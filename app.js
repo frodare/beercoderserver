@@ -150,14 +150,31 @@
 	
 
 
-	var repoRequest = function (req, res, next) {
-		console.log('user: ', req.user);
-		//res.send('repo ...');
-		res.end();
-	};
+	app.post('/repo/', function (req, res, next) {
+		if(!req.user){
+			res.send(403);
+			return;
+		}
+		next();
+	});
 		
-	app.post('/repo', repoRequest);
-	app.get('/repo', repoRequest);
+	app.post('/repo/save', function (res, req) {
+		console.log('Save recipe', req.body);
+
+		var recipe = req.body || {};
+		recipe.user = req.user.email;
+
+		res.send(req.body);
+	});
+
+	app.post('/repo/list', function (res, req) {
+		console.log('search recipes', req.body);
+
+		var search = req.body || {};
+		req.body.user = req.user.email;
+
+		res.send(req.body);
+	});
 
 
 
