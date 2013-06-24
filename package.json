@@ -1,0 +1,23 @@
+{
+  "author": "Charles Howard <frodare@gmail.com> (http://www.beercoder.com/)",
+  "name": "beercoderserver",
+  "description": "backend for beercoder",
+  "version": "0.0.1",
+  "homepage": "http://www.beercoder.com/",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/frodare/beercoderserver.git"
+  },
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "dependencies": {
+    "express": "3.x",
+    "passport": "*",
+    "passport-facebook": "*",
+    "passport-google": "*",
+    "passport-twitter": "*",
+    "mongojs": "*"
+  },
+  "devDependencies": {}
+}
