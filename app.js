@@ -8,7 +8,7 @@
 	};
 
 	var mongoParams = {
-		url : "mydb", // "username:password@example.com/mydb"
+		url : "beercoder", // "username:password@example.com/mydb"
 		collections : ["users", "recipes"]
 	};
 
@@ -99,81 +99,56 @@
 		
 	}));
 
-
-
-
-
-
-	/*
-	 * 
-	 * 
-	 *  Facebook auth, accessToken: CAACdJ2qClQEBAIk1eGycZBD7AG74HlA0cgqLw8XEGSH3TgcZC5gNn3IqG1vOoZA1LcKbGFmqI9eQqQZCWWJlFGzeGMwK4FhTQiwk3TDr9W65CSjz35gHIl9hmTwVCrHZBH7ePc8BZBd3dwUkcak7MI refreshToken undefined profile 
-	 * { provider: 'facebook',
-		  id: '100000306353616',
-		  username: 'frodare',
-		  displayName: 'Charles Howard',
-		  name: 
-		   { familyName: 'Howard',
-		     givenName: 'Charles',
-		     middleName: undefined },
-		  gender: 'male',
-		  profileUrl: 'http://www.facebook.com/frodare',
-		  emails: [ { value: 'frodare@gmail.com' } ],
-		  _raw: '{"id":"100000306353616","name":"Charles Howard","first_name":"Charles","last_name":"Howard","link":"http:\\/\\/www.facebook.com\\/frodare","username":"frodare","gender":"male","email":"frodare\\u0040gmail.com","timezone":-4,"locale":"en_US","verified":true,"updated_time":"2013-06-13T10:15:10+0000"}',
-		  _json: 
-		   { id: '100000306353616',
-		     name: 'Charles Howard',
-		     first_name: 'Charles',
-		     last_name: 'Howard',
-		     link: 'http://www.facebook.com/frodare',
-		     username: 'frodare',
-		     gender: 'male',
-		     email: 'frodare@gmail.com',
-		     timezone: -4,
-		     locale: 'en_US',
-		     verified: true,
-		     updated_time: '2013-06-13T10:15:10+0000' } }
-
-
-	 * 
-	 */
-	
-
-	
 	app.use(express.static(__dirname + '/beercoder'));
-
 	app.use(express.cookieParser());
 	app.use(express.bodyParser());
 	app.use(express.session({ secret: 'keyboard cat' }));
 	app.use(passport.initialize());
 	app.use(passport.session());
 	
-
-
-	app.post('/repo/', function (req, res, next) {
+	app.post(/^\/repo\//, function (req, res, next) {
 		if(!req.user){
 			res.send(403);
 			return;
 		}
 		next();
 	});
+
+	app.post('/repo/status', function (req, res) {
+
+		var data = {
+			user: req.user
+		};
+
+		console.log('status request', req.body, data);
+		res.json(data);
+	});
 		
-	app.post('/repo/save', function (res, req) {
+	app.post('/repo/save', function (req, res) {
 		console.log('Save recipe', req.body);
 
 		var recipe = req.body || {};
 		recipe.user = req.user.email;
 
-		res.send(req.body);
+		db.recipes.save(recipe);
+
+		res.json(req.body);
 	});
 
-	app.post('/repo/list', function (res, req) {
+	app.post('/repo/list', function (req, res) {
 		console.log('search recipes', req.body);
 
 		var search = req.body || {};
-		req.body.user = req.user.email;
+		search.user = req.user.email;
 
-		res.send(req.body);
+		db.recipes.find(search, function(err, recipes) {
+			if(err){
+				res.send(500);
+				return;
+			}
+			res.json(recipes);
+		});
+
 	});
 
 
