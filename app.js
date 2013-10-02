@@ -120,23 +120,47 @@
 			user: req.user
 		};
 
-		console.log('status request', req.body, data);
+		//console.log('status request', req.body, data);
 		res.json(data);
 	});
 		
 	app.post('/repo/save', function (req, res) {
-		console.log('Save recipe', req.body);
+		//console.log('Save recipe', req.body);
 
 		var recipe = req.body || {};
 		recipe.user = req.user.email;
+
+		recipe.revision = (new Date()).getTime();
 
 		db.recipes.save(recipe);
 
 		res.json(req.body);
 	});
 
+	app.post('/repo/delete', function (req, res) {
+		
+
+		var recipe = req.body || {};
+		//recipe.user = req.user.email;
+
+		var filter = {
+			$and: [{user: req.user.email}, {_id: recipe._id}]
+		};
+
+		if(!recipe._id){
+			console.log('No ID given for delete command');
+			res.send(500);
+		}
+
+		console.log('Delete recipe', filter);
+
+		db.recipes.remove(filter, true);
+
+		res.json(req.body);
+	});
+
 	app.post('/repo/list', function (req, res) {
-		console.log('search recipes', req.body);
+		//console.log('search recipes', req.body);
 
 		var search = req.body || {};
 		search.user = req.user.email;
