@@ -19,7 +19,6 @@
 		app = express(),
 		db = require("mongojs").connect(mongoParams.url, mongoParams.collections);
 
-
 	var User = {
 		findByEmail: function (email, done) {
 			db.users.find({email: email}, function(err, users) {
@@ -132,6 +131,10 @@
 
 		recipe.revision = (new Date()).getTime();
 
+		if(recipe._id){
+			recipe._id = db.ObjectId(recipe._id); 
+		}
+
 		db.recipes.save(recipe);
 
 		res.json(req.body);
@@ -143,18 +146,21 @@
 		var recipe = req.body || {};
 		//recipe.user = req.user.email;
 
+		console.log(JSON.stringify(recipe));
+
 		var filter = {
-			$and: [{user: req.user.email}, {_id: recipe._id}]
+			$and: [{user: req.user.email}, {_id: db.ObjectId(recipe._id)}]
 		};
 
 		if(!recipe._id){
 			console.log('No ID given for delete command');
 			res.send(500);
+			return;
 		}
 
 		console.log('Delete recipe', filter);
 
-		db.recipes.remove(filter, true);
+		db.recipes.remove(filter, 1);
 
 		res.json(req.body);
 	});
