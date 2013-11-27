@@ -82,21 +82,13 @@
 				};
 
 				db.users.save(user);
-
-				console.log('saving user');
-
 			}else{
 				user = users[0];
-
-				console.log('found user', user.email);
 			}
 
 			done(null , user);
 			
 		});
-
-
-		
 	}));
 
 	app.use(express.static(__dirname + '/beercoder'));
@@ -105,7 +97,34 @@
 	app.use(express.session({ secret: 'keyboard cat' }));
 	app.use(passport.initialize());
 	app.use(passport.session());
-	
+
+
+	app.post('/repo/list', function (req, res) {
+		//console.log('search recipes', req.body);
+
+		var search = req.body || {};
+
+		if(req.user && req.user.email){
+			search.user = req.user.email;
+		}
+
+		if(search.id){
+			search._id = db.ObjectId(search.id);
+			delete search.id;
+		}
+
+		console.log('list', JSON.stringify(search));
+
+		db.recipes.find(search, function(err, recipes) {
+			if(err){
+				res.send(500);
+				return;
+			}
+			res.json(recipes);
+		});
+
+	});
+
 	app.post(/^\/repo\//, function (req, res, next) {
 		if(!req.user){
 			res.send(403);
@@ -159,21 +178,7 @@
 		res.json(req.body);
 	});
 
-	app.post('/repo/list', function (req, res) {
-		//console.log('search recipes', req.body);
-
-		var search = req.body || {};
-		search.user = req.user.email;
-
-		db.recipes.find(search, function(err, recipes) {
-			if(err){
-				res.send(500);
-				return;
-			}
-			res.json(recipes);
-		});
-
-	});
+	
 
 
 
